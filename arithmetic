@@ -1,0 +1,64 @@
+# 1.Sympy数学符号方法
+
+# Do it by sympy
+import sympy as S
+
+X10, X20, X50 = S.symbols("X10,X20,X50", real=True)
+
+xi = 10 * X10 + 20 * X20 + 50 * X50
+print("ξ = ", xi)
+eta = X10 * X20 * (1 - X50) + X10 * (1 - X20) * (X50) + (1 - X10) * X20 * (X50)
+print("η = ", eta)
+
+num = S.summation(xi * eta, (X10, 0, 1), (X20, 0, 1), (X50, 0, 1))
+
+den = S.summation(eta * eta, (X10, 0, 1), (X20, 0, 1), (X50, 0, 1))
+
+alpha = num / den
+
+print(alpha)
+
+# 2.用Pandas，分组和计算（程序员的方式）
+# Do it by pandas
+import pandas as pd
+
+d = pd.DataFrame(columns=['X10', 'X20', 'X50'])
+ntest = 10 ** 6
+d.X10 = np.random.randint(0, 2, ntest)
+d.X10 = np.random.randint(0, 2, ntest)
+d.X20 = np.random.randint(0, 2, ntest)
+d.X50 = np.random.randint(0, 2, ntest)
+
+grp = d.groupby(d.eval('X10+X20+X50'))
+grp.get_group(2).eval('10*X10+20*X20+50*X50').mean()
+
+# 3.用Numpy,矩阵计算（速度快，有飞起来的感觉）
+
+# Do it by numpy
+import numpy as np
+from numpy import array
+
+ntest = 10 ** 6
+x = np.random.randint(0, 2, (3, ntest))
+
+expectation = np.dot(x[:, x.sum(axis=0) == 2].T, array([10, 20, 50])).mean()
+
+print(expectation)
+
+# 4. 用笛卡尔笛卡尔乘积，过滤只有两个硬币朝上事件，计算期望
+
+# do it by pure python
+import itertools as it
+
+Xi = list(it.product((0, 1), (0, 1), (0, 1)))  # 笛卡尔乘积函数 初始化 - 所有掷硬币的事件 8种情况，三个硬币，每个硬币只有正面和反面
+
+Xi_conditioned = list(it.filterfalse(lambda i: sum(i) != 2, Xi))  # 过滤 只有两个硬币正面朝上的事件，只有三个事件
+
+results = list((map(lambda k: 10 * k[0] + 20 * k[1] + 50 * k[2], Xi_conditioned)))
+dem = len(results)
+num = sum(results)
+
+print(Xi)
+print(Xi_conditioned)
+print(results)
+print(num / dem)
